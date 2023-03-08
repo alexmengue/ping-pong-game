@@ -25,6 +25,28 @@ const line = {
     }
 };
 
+const score = {
+    player: 0,
+    computer: 0,
+
+    increasePlayer: function() {
+        this.player++;
+    },
+
+    increaseComputer: function() {
+        this.computer++;
+    },
+
+    draw: function() {
+        canvasContext.font = 'bold 72px Arial';
+        canvasContext.textAlign = 'center';
+        canvasContext.textBaseline = 'top';
+        canvasContext.fillStyle = '#FFFFFF';
+        canvasContext.fillText(this.player, field.width / 4, 50);
+        canvasContext.fillText(this.computer, field.width / 2 + field.width / 4, 50);
+    }
+};
+
 const leftRacket = {
     x: gapX,
     y: field.height / 2,
@@ -48,9 +70,18 @@ const rightRacket = {
     y: field.height / 2,
     width: line.width,
     height: 200,
+    speed: 8,
 
     _move: function() {
-        this.y = ball.y;
+        if (this.y + this.height / 2 < ball.y + ball.radius) {
+            this.y += this.speed; 
+        } else {
+            this.y -= this.speed;
+        }
+    },
+
+    speedUp: function() {
+        this.speed++;
     },
 
     draw: function() {
@@ -65,7 +96,7 @@ const ball = {
     x: field.width / 6,
     y: field.height / 2,
     radius: 20,
-    speed: 2,
+    speed: 9,
     directionX: 1,
     directionY: 1,
 
@@ -74,7 +105,8 @@ const ball = {
             if (this.y + this.radius > rightRacket.y && this.y - this.radius < rightRacket.y + rightRacket.height) {
                 this._reverseX();
             } else {
-
+                score.increasePlayer();
+                this._pointUp();
             }
         }
 
@@ -82,11 +114,10 @@ const ball = {
             if (this.y + this.radius > leftRacket.y && this.y - this.radius < leftRacket.y + leftRacket.height) {
                 this._reverseX();
             } else {
-
+                score.increaseComputer();
+                this._pointUp();
             }
         }
-
-
 
         if ((this.x - this.radius < 0 && this.directionX < 0) || (this.x > field.width - this.radius && this.directionX > 0)) {
             this._reverseX();
@@ -103,6 +134,17 @@ const ball = {
 
     _reverseY: function() {
         this.directionY *= -1;
+    },
+
+    _speedUp: function() {
+        this.speed += 1;
+    },
+
+    _pointUp: function() {
+        this.x = field.width / 2;
+        this.y = field.height / 2;
+
+        this._reverseX();
     },
 
     _move: function() {
@@ -132,6 +174,7 @@ function setup() {
 function draw() {
     field.draw();
     line.draw();
+    score.draw();
 
     leftRacket.draw();
     rightRacket.draw();
